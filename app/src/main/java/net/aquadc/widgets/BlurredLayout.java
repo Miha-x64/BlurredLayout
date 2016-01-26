@@ -24,25 +24,29 @@ import java.util.List;
 public class BlurredLayout extends FrameLayout {
 
     public BlurredLayout(Context context) {
-        super(context);
-        mRenderScript = RenderScript.create(context);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        this(context, null, 0);
     }
     public BlurredLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mRenderScript = RenderScript.create(context);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        this(context, attrs, 0);
     }
     public BlurredLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mRenderScript = RenderScript.create(context);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        if (isInEditMode()) {
+            mRenderScript = null;
+        } else {
+            mRenderScript = RenderScript.create(context);
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
     }
     @TargetApi(21) @SuppressWarnings("unused")
     public BlurredLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mRenderScript = RenderScript.create(context);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        if (isInEditMode()) {
+            mRenderScript = null;
+        } else {
+            mRenderScript = RenderScript.create(context);
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
     }
 
     private static final Paint BITMAP_PAINT = new Paint();
@@ -64,6 +68,11 @@ public class BlurredLayout extends FrameLayout {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        if (isInEditMode()) {
+            super.dispatchDraw(canvas);
+            return;
+        }
+
         if (mBlurRects == null)
             findBlurRects();
 
@@ -159,8 +168,8 @@ public class BlurredLayout extends FrameLayout {
             expandRadii(mBlurRects.length);
 
         for (int i = 0; i < mBlurRadii.length; i++) {
-            if (mBlurRadii[i] < 0)
-                mBlurRadii[i] = 0;
+            if (mBlurRadii[i] <= 0)
+                mBlurRadii[i] = 10;
             else if (mBlurRadii[i] > 25)
                 mBlurRadii[i] = 25;
         }
